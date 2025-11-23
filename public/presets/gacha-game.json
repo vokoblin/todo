@@ -1,0 +1,61 @@
+{
+  "name": "Gacha Game Dailies",
+  "description": "Daily tasks for gacha/mobile games",
+  "items": [
+    {
+      "name": "Spend All Energy",
+      "description": "Use up daily energy allowance",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Claim Energy Refill",
+      "description": "Collect free energy refill",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Daily Missions",
+      "description": "Complete all daily mission objectives",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Free Daily Summon",
+      "description": "Use free daily summon ticket",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Event Currency Farm",
+      "description": "Farm event-specific currency",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Weekly Boss Battle",
+      "description": "Defeat weekly boss for rare rewards",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "MMO Daily Tasks",
+  "description": "Common daily tasks for MMO games",
+  "items": [
+    {
+      "name": "Daily Login Reward",
+      "description": "Claim daily login bonus",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Daily Dungeon Run",
+      "description": "Complete daily dungeon for rewards",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Weekly Raid",
+      "description": "Complete weekly raid boss",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false
+    },
+    {
+      "name": "Daily PvP Match",
+      "description": "Win 3 PvP matches",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Mine Rare Ores",
+      "description": "Collect rare ore deposits",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    },
+    {
+      "name": "Harvest Special Plants",
+      "description": "Gather special herbs and plants",
+      "resetTime": {
+        "type": "daily",
+        "time": "20:00"
+      },
+      "isSection": false
+    }
+  ]
+}
