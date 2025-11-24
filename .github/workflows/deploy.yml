@@ -1,49 +1,39 @@
 name: Deploy
-
 on:
   push:
     branches:
       - main
-
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 17
-
+          node-version: 20
       - name: Npm install
         uses: bahmutov/npm-install@v1
-
       - name: Build front-end
         run: npm run build
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: fe-artifact
           path: ./dist
-
   deploy:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: fe-artifact
           path: ./dist
-
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
