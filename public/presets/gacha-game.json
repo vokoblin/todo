@@ -3,51 +3,74 @@
   "description": "Daily tasks for gacha/mobile games",
   "items": [
     {
+      "id": "daily-section",
+      "name": "Daily Tasks",
+      "description": "Essential daily activities that reset every day",
+      "isSection": true
+    },
+    {
+      "id": "energy-task",
       "name": "Spend All Energy",
       "description": "Use up daily energy allowance",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "daily-section"
     },
     {
+      "id": "energy-refill",
       "name": "Claim Energy Refill",
       "description": "Collect free energy refill",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "daily-section"
     },
     {
+      "id": "daily-missions",
       "name": "Daily Missions",
       "description": "Complete all daily mission objectives",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "daily-section"
     },
     {
+      "id": "daily-summon",
       "name": "Free Daily Summon",
       "description": "Use free daily summon ticket",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "daily-section"
     },
     {
+      "id": "event-section",
+      "name": "Events & Special",
+      "description": "Limited-time events and special activities",
+      "isSection": true
+    },
+    {
+      "id": "event-currency",
       "name": "Event Currency Farm",
       "description": "Farm event-specific currency",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "event-section"
     },
     {
+      "id": "weekly-boss",
       "name": "Weekly Boss Battle",
       "description": "Defeat weekly boss for rare rewards",
       "resetTime": {
@@ -55,7 +78,8 @@
         "time": "21:00",
         "weekday": 0
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "event-section"
     }
   ]
 }

@@ -3,24 +3,41 @@
   "description": "Common daily tasks for MMO games",
   "items": [
     {
+      "id": "rewards-section",
+      "name": "Daily Rewards",
+      "description": "Daily login and basic rewards",
+      "isSection": true
+    },
+    {
+      "id": "login-reward",
       "name": "Daily Login Reward",
       "description": "Claim daily login bonus",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "rewards-section"
     },
     {
+      "id": "combat-section",
+      "name": "Combat Activities",
+      "description": "Daily dungeons, raids, and PvP",
+      "isSection": true
+    },
+    {
+      "id": "daily-dungeon",
       "name": "Daily Dungeon Run",
       "description": "Complete daily dungeon for rewards",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "combat-section"
     },
     {
+      "id": "weekly-raid",
       "name": "Weekly Raid",
       "description": "Complete weekly raid boss",
       "resetTime": {
@@ -28,34 +45,47 @@
         "time": "21:00",
         "weekday": 0
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "combat-section"
     },
     {
+      "id": "daily-pvp",
       "name": "Daily PvP Match",
       "description": "Win 3 PvP matches",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "combat-section"
     },
     {
+      "id": "gathering-section",
+      "name": "Resource Gathering",
+      "description": "Daily resource collection activities",
+      "isSection": true
+    },
+    {
+      "id": "mine-ores",
       "name": "Mine Rare Ores",
       "description": "Collect rare ore deposits",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "gathering-section"
     },
     {
+      "id": "harvest-plants",
       "name": "Harvest Special Plants",
       "description": "Gather special herbs and plants",
       "resetTime": {
         "type": "daily",
         "time": "20:00"
       },
-      "isSection": false
+      "isSection": false,
+      "parentId": "gathering-section"
     }
   ]
 }
