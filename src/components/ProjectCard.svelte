@@ -5,7 +5,15 @@
 
   export let project: TodoProject;
 
-  $: expanded = $todoStore.uiState?.expandedProjects?.[project.id] ?? false;
+  let expanded = false;
+  
+  $: {
+    if ($todoStore.uiState && $todoStore.uiState.expandedProjects) {
+      expanded = $todoStore.uiState.expandedProjects[project.id] === true;
+    } else {
+      expanded = false;
+    }
+  }
   $: completedCount = project.items.filter(item => !item.isSection && item.status === 'completed').length;
   $: totalTasks = project.items.filter(item => !item.isSection).length;
   $: completionPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
