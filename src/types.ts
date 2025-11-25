@@ -31,6 +31,10 @@ export type TodoData = {
   settings: {
     theme: 'light' | 'dark';
   };
+  uiState: {
+    expandedProjects: Record<string, boolean>;
+    expandedSections: Record<string, boolean>;
+  };
 };
 
 export type PresetProject = {

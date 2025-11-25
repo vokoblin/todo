@@ -1,30 +1,24 @@
 <script lang="ts">
   import { todoStore } from '../stores';
-  import type { TodoProject, TodoItem } from '../types';
+  import type { TodoProject } from '../types';
   import TodoItemComponent from './TodoItemComponent.svelte';
 
   export let project: TodoProject;
 
-  let expanded = false;
-  
+  $: expanded = $todoStore.uiState?.expandedProjects?.[project.id] ?? false;
   $: completedCount = project.items.filter(item => !item.isSection && item.status === 'completed').length;
   $: totalTasks = project.items.filter(item => !item.isSection).length;
   $: completionPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
-  
   $: rootItems = project.items.filter(item => !item.parentId);
 
   function toggleExpanded() {
-    expanded = !expanded;
+    todoStore.toggleProjectExpanded(project.id);
   }
 
   function deleteProject() {
     if (confirm(`Are you sure you want to delete "${project.name}"?`)) {
       todoStore.deleteProject(project.id);
     }
-  }
-
-  function getItemsByParent(parentId: string | null): TodoItem[] {
-    return project.items.filter(item => item.parentId === parentId);
   }
 </script>
 
