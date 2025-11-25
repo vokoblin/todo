@@ -15,6 +15,7 @@
   let customItems: TodoItem[] = [];
   let editingItem: TodoItem | null = null;
   let showItemForm = false;
+  let draggedItem: TodoItem | null = null;
 
   onMount(async () => {
     await loadPresets();
@@ -99,7 +100,7 @@
       status: 'pending',
       resetTime: { type: 'daily', time: '20:00' },
       lastReset: 0,
-      parentId: null,
+      parentId: undefined,
       isSection: false
     };
   }
@@ -123,11 +124,87 @@
   }
 
   function removeItem(itemId: string) {
-    customItems = customItems.filter(item => item.id !== itemId);
+    const item = customItems.find(item => item.id === itemId);
+    if (item?.isSection) {
+      // When removing a section, move its children to root level
+      customItems = customItems.map(item => 
+        item.parentId === itemId ? { ...item, parentId: undefined } : item
+      ).filter(item => item.id !== itemId);
+    } else {
+      // Remove task normally
+      customItems = customItems.filter(item => item.id !== itemId);
+    }
   }
 
   function generateId(): string {
     return Math.random().toString(36).substr(2, 9);
+  }
+
+  // Drag and Drop handlers
+  function handleDragStart(event: DragEvent, item: TodoItem) {
+    draggedItem = item;
+    event.dataTransfer!.effectAllowed = 'move';
+  }
+
+  function handleDragOver(event: DragEvent, targetItem: TodoItem) {
+    event.preventDefault();
+    if (draggedItem && draggedItem.id !== targetItem.id) {
+      event.dataTransfer!.dropEffect = 'move';
+    }
+  }
+
+  function handleDrop(event: DragEvent, targetItem: TodoItem) {
+    event.preventDefault();
+    if (draggedItem && draggedItem.id !== targetItem.id) {
+      if (targetItem.isSection && !draggedItem.isSection) {
+        // Drop task into section
+        customItems = customItems.map(item => 
+          item.id === draggedItem!.id 
+            ? { ...item, parentId: targetItem.id }
+            : item
+        );
+      } else if (!targetItem.isSection && !draggedItem.isSection && targetItem.parentId) {
+        // Drop task next to another task that's in a section
+        customItems = customItems.map(item => 
+          item.id === draggedItem!.id 
+            ? { ...item, parentId: targetItem.parentId }
+            : item
+        );
+      } else if (!targetItem.parentId && !targetItem.isSection) {
+        // Drop task to root level next to another root task
+        customItems = customItems.map(item => 
+          item.id === draggedItem!.id 
+            ? { ...item, parentId: undefined }
+            : item
+        );
+      }
+    }
+    draggedItem = null;
+  }
+
+  function handleDragEnd() {
+    draggedItem = null;
+  }
+
+  // Helper function to get items with hierarchy
+  function getHierarchicalItems() {
+    const rootItems = customItems.filter(item => !item.parentId);
+    const result: (TodoItem & { level: number })[] = [];
+    
+    function addItemsRecursively(items: TodoItem[], level: number) {
+      items.forEach(item => {
+        result.push({ ...item, level });
+        if (item.isSection) {
+          const children = customItems.filter(child => child.parentId === item.id);
+          if (children.length > 0) {
+            addItemsRecursively(children, level + 1);
+          }
+        }
+      });
+    }
+    
+    addItemsRecursively(rootItems, 0);
+    return result;
   }
 
   function close() {
@@ -237,40 +314,79 @@
 
           <!-- Custom Items -->
           <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-medium text-gray-900 dark:text-white">Tasks & Sections</h3>
-              <button
-                on:click={addCustomItem}
-                class="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
-              >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Add Item
-              </button>
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Tasks & Sections</h3>
+                <button
+                  on:click={addCustomItem}
+                  class="inline-flex items-center px-3 py-1 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add Item
+                </button>
+              </div>
+              {#if customItems.length > 0}
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                  💡 Drag tasks onto sections to organize them, or drag them to other positions to reorder
+                </p>
+              {/if}
             </div>
 
             <div class="space-y-2 max-h-40 overflow-y-auto">
-              {#each customItems as item (item.id)}
-                <div class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
-                  <div class="flex-1">
+              {#each getHierarchicalItems() as item (item.id)}
+                <div 
+                  class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-move transition-all duration-200 
+                    {draggedItem?.id === item.id ? 'opacity-50 scale-95' : ''}
+                    {item.isSection ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : ''}
+                    {draggedItem && draggedItem.id !== item.id && item.isSection && !draggedItem.isSection ? 'ring-2 ring-blue-300 dark:ring-blue-600' : ''}"
+                  style="margin-left: {item.level * 20}px"
+                  draggable="true"
+                  on:dragstart={(e) => handleDragStart(e, item)}
+                  on:dragover={(e) => handleDragOver(e, item)}
+                  on:drop={(e) => handleDrop(e, item)}
+                  on:dragend={handleDragEnd}
+                >
+                  <div class="flex items-center gap-2 flex-1">
+                    {#if item.level > 0}
+                      <span class="text-gray-400 dark:text-gray-500">└─</span>
+                    {/if}
                     <span class="font-medium text-gray-900 dark:text-white">
                       {item.isSection ? '📁' : '📋'} {item.name}
                     </span>
-                    {#if item.description}
-                      <p class="text-sm text-gray-600 dark:text-gray-300">{item.description}</p>
+                    {#if item.isSection && customItems.filter(child => child.parentId === item.id).length > 0}
+                      <span class="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded">
+                        {customItems.filter(child => child.parentId === item.id).length} items
+                      </span>
                     {/if}
                   </div>
-                  <button
-                    on:click={() => removeItem(item.id)}
-                    class="text-gray-400 hover:text-red-600"
-                  >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+                  {#if item.description}
+                    <p class="text-sm text-gray-600 dark:text-gray-300 flex-1">{item.description}</p>
+                  {/if}
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 cursor-grab">⋮⋮</span>
+                    <button
+                      on:click={() => removeItem(item.id)}
+                      class="text-gray-400 hover:text-red-600"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               {/each}
+              
+              {#if customItems.length === 0}
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <p class="text-sm">No tasks or sections yet</p>
+                  <p class="text-xs">Click "Add Item" to get started</p>
+                </div>
+              {/if}
             </div>
           </div>
 
