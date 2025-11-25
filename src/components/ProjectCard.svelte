@@ -30,17 +30,8 @@
   }
 </script>
 
-<div 
-  class="rounded-xl shadow-sm border overflow-hidden transition-all duration-300"
-  class:bg-white={!expanded}
-  class:dark:bg-gray-800={!expanded}
-  class:border-gray-200={!expanded}
-  class:dark:border-gray-700={!expanded}
-  class:bg-indigo-50={expanded}
-  class:dark:bg-indigo-900/20={expanded}
-  class:border-indigo-200={expanded}
-  class:dark:border-indigo-700={expanded}
-  class:shadow-lg={expanded}
+<div
+  class="rounded-xl shadow-sm border overflow-hidden transition-all duration-300 {expanded ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700 shadow-lg' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}"
 >
   <div class="p-6">
     <div class="flex items-start justify-between mb-4">
