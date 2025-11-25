@@ -30,7 +30,18 @@
   }
 </script>
 
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+<div 
+  class="rounded-xl shadow-sm border overflow-hidden transition-all duration-300"
+  class:bg-white={!expanded}
+  class:dark:bg-gray-800={!expanded}
+  class:border-gray-200={!expanded}
+  class:dark:border-gray-700={!expanded}
+  class:bg-indigo-50={expanded}
+  class:dark:bg-indigo-900/20={expanded}
+  class:border-indigo-200={expanded}
+  class:dark:border-indigo-700={expanded}
+  class:shadow-lg={expanded}
+>
   <div class="p-6">
     <div class="flex items-start justify-between mb-4">
       <div class="flex-1">
