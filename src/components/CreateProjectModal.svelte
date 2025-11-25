@@ -46,17 +46,23 @@
 
   function createProjectFromPreset() {
     if (!selectedPreset) return;
-    
+
+    // First pass: create ID mapping from old preset IDs to new generated IDs
+    const idMap = new Map<string, string>();
+    selectedPreset.items.forEach(item => {
+      idMap.set(item.id, generateId());
+    });
+
     const project: TodoProject = {
       id: generateId(),
       name: selectedPreset.name,
       description: selectedPreset.description,
       items: selectedPreset.items.map(item => ({
         ...item,
-        id: generateId(),
+        id: idMap.get(item.id)!,
         status: 'pending' as const,
         lastReset: 0,
-        parentId: null // Simplified: all items at root level for now
+        parentId: item.parentId ? idMap.get(item.parentId) || null : null
       })),
       createdAt: Date.now(),
       isPreset: true
