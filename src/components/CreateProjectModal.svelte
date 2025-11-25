@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onMount } from 'svelte';
+  import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import { todoStore } from '../stores';
   import type { TodoProject, TodoItem, PresetProject, ResetTime } from '../types';
 
@@ -18,6 +18,8 @@
   let editingItem: TodoItem | null = null;
   let showItemForm = false;
   let draggedItem: TodoItem | null = null;
+  let itemsContainer: HTMLElement;
+  let autoScrollInterval: NodeJS.Timeout | null = null;
 
   onMount(async () => {
     await loadPresets();
@@ -28,6 +30,14 @@
       projectName = editingProject.name;
       projectDescription = editingProject.description || '';
       customItems = JSON.parse(JSON.stringify(editingProject.items)); // Deep clone
+    }
+  });
+
+  onDestroy(() => {
+    // Clean up auto-scroll interval if component unmounts while dragging
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
     }
   });
 
@@ -238,6 +248,51 @@
 
   function handleDragEnd() {
     draggedItem = null;
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  }
+
+  function handleContainerDragOver(event: DragEvent) {
+    if (!draggedItem || !itemsContainer) return;
+
+    const rect = itemsContainer.getBoundingClientRect();
+    const scrollThreshold = 50; // pixels from edge to trigger scroll
+    const scrollSpeed = 10; // pixels per frame
+    const mouseY = event.clientY;
+
+    // Clear any existing interval
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+
+    if (mouseY - rect.top < scrollThreshold && itemsContainer.scrollTop > 0) {
+      // Scroll up
+      autoScrollInterval = setInterval(() => {
+        if (itemsContainer.scrollTop > 0) {
+          itemsContainer.scrollTop -= scrollSpeed;
+        } else {
+          clearInterval(autoScrollInterval!);
+          autoScrollInterval = null;
+        }
+      }, 16);
+    } else if (rect.bottom - mouseY < scrollThreshold) {
+      // Scroll down
+      const maxScroll = itemsContainer.scrollHeight - itemsContainer.clientHeight;
+      if (itemsContainer.scrollTop < maxScroll) {
+        autoScrollInterval = setInterval(() => {
+          const maxScroll = itemsContainer.scrollHeight - itemsContainer.clientHeight;
+          if (itemsContainer.scrollTop < maxScroll) {
+            itemsContainer.scrollTop += scrollSpeed;
+          } else {
+            clearInterval(autoScrollInterval!);
+            autoScrollInterval = null;
+          }
+        }, 16);
+      }
+    }
   }
 
   function handleRootDropZoneDragOver(event: DragEvent) {
@@ -411,7 +466,11 @@
               {/if}
             </div>
 
-            <div class="space-y-2 max-h-40 overflow-y-auto">
+            <div
+              class="space-y-2 max-h-40 overflow-y-auto"
+              bind:this={itemsContainer}
+              on:dragover={handleContainerDragOver}
+            >
               {#each hierarchicalItems as item (item.id)}
                 <div
                   class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-move transition-all duration-200
