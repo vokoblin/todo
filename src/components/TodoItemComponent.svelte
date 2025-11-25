@@ -8,17 +8,17 @@
   export let allItems: TodoItem[];
   export let depth: number = 0;
 
-  let sectionExpanded = true;
   let timeRemaining = '';
   let timeInterval: NodeJS.Timeout;
 
+  $: sectionExpanded = item.isSection 
+    ? ($todoStore.uiState?.expandedSections?.[item.id] ?? true)
+    : true;
   $: childItems = allItems.filter(child => child.parentId === item.id);
-  $: indentClass = `ml-${depth * 4}`;
   
   onMount(() => {
     if (!item.isSection) {
       timeRemaining = getTimeUntilReset(item.resetTime);
-      // Update time remaining every minute
       timeInterval = setInterval(() => {
         timeRemaining = getTimeUntilReset(item.resetTime);
       }, 60000);
@@ -32,7 +32,9 @@
   });
 
   function toggleSectionExpanded() {
-    sectionExpanded = !sectionExpanded;
+    if (item.isSection) {
+      todoStore.toggleSectionExpanded(item.id);
+    }
   }
 
   function toggleStatus() {

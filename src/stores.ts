@@ -7,6 +7,10 @@ const defaultData: TodoData = {
   projects: [],
   settings: {
     theme: 'light'
+  },
+  uiState: {
+    expandedProjects: {},
+    expandedSections: {}
   }
 };
 
@@ -23,6 +27,13 @@ function createTodoStore() {
         if (stored) {
           try {
             const data = JSON.parse(stored);
+            // Ensure backward compatibility by adding uiState if missing
+            if (!data.uiState) {
+              data.uiState = {
+                expandedProjects: {},
+                expandedSections: {}
+              };
+            }
             set(data);
           } catch (e) {
             console.error('Failed to parse stored todo data:', e);
@@ -160,6 +171,46 @@ function createTodoStore() {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
         }
         
+        return newData;
+      });
+    },
+
+    // Toggle project expanded state
+    toggleProjectExpanded: (projectId: string) => {
+      update(data => {
+        const newData = {
+          ...data,
+          uiState: {
+            ...data.uiState,
+            expandedProjects: {
+              ...data.uiState.expandedProjects,
+              [projectId]: !data.uiState.expandedProjects[projectId]
+            }
+          }
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+        }
+        return newData;
+      });
+    },
+
+    // Toggle section expanded state
+    toggleSectionExpanded: (sectionId: string) => {
+      update(data => {
+        const newData = {
+          ...data,
+          uiState: {
+            ...data.uiState,
+            expandedSections: {
+              ...data.uiState.expandedSections,
+              [sectionId]: !data.uiState.expandedSections[sectionId]
+            }
+          }
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+        }
         return newData;
       });
     }
