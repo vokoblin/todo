@@ -141,8 +141,12 @@
 
     const itemIndex = customItems.findIndex(item => item.id === editingItem!.id);
     if (itemIndex >= 0) {
-      customItems[itemIndex] = { ...editingItem };
+      // Update existing item - create new array to trigger reactivity
+      customItems = customItems.map(item =>
+        item.id === editingItem!.id ? { ...editingItem } : item
+      );
     } else {
+      // Add new item
       customItems = [...customItems, { ...editingItem }];
     }
 
@@ -171,6 +175,14 @@
     return Math.random().toString(36).substr(2, 9);
   }
 
+  // Helper function to check if an item is a descendant of another (prevents circular nesting)
+  function isDescendantOf(itemId: string, ancestorId: string): boolean {
+    const item = customItems.find(i => i.id === itemId);
+    if (!item || !item.parentId) return false;
+    if (item.parentId === ancestorId) return true;
+    return isDescendantOf(item.parentId, ancestorId);
+  }
+
   // Drag and Drop handlers
   function handleDragStart(event: DragEvent, item: TodoItem) {
     draggedItem = item;
@@ -180,6 +192,11 @@
   function handleDragOver(event: DragEvent, targetItem: TodoItem) {
     event.preventDefault();
     if (draggedItem && draggedItem.id !== targetItem.id) {
+      // Prevent dropping a section into itself or its descendants
+      if (draggedItem.isSection && isDescendantOf(targetItem.id, draggedItem.id)) {
+        event.dataTransfer!.dropEffect = 'none';
+        return;
+      }
       event.dataTransfer!.dropEffect = 'move';
     }
   }
@@ -187,24 +204,30 @@
   function handleDrop(event: DragEvent, targetItem: TodoItem) {
     event.preventDefault();
     if (draggedItem && draggedItem.id !== targetItem.id) {
-      if (targetItem.isSection && !draggedItem.isSection) {
-        // Drop task into section
-        customItems = customItems.map(item => 
-          item.id === draggedItem!.id 
+      // Prevent dropping a section into itself or its descendants
+      if (draggedItem.isSection && isDescendantOf(targetItem.id, draggedItem.id)) {
+        draggedItem = null;
+        return;
+      }
+
+      if (targetItem.isSection) {
+        // Drop item (task or section) into section
+        customItems = customItems.map(item =>
+          item.id === draggedItem!.id
             ? { ...item, parentId: targetItem.id }
             : item
         );
-      } else if (!targetItem.isSection && !draggedItem.isSection && targetItem.parentId) {
-        // Drop task next to another task that's in a section
-        customItems = customItems.map(item => 
-          item.id === draggedItem!.id 
+      } else if (!targetItem.isSection && targetItem.parentId) {
+        // Drop item next to another item that's in a section
+        customItems = customItems.map(item =>
+          item.id === draggedItem!.id
             ? { ...item, parentId: targetItem.parentId }
             : item
         );
       } else if (!targetItem.parentId && !targetItem.isSection) {
-        // Drop task to root level next to another root task
-        customItems = customItems.map(item => 
-          item.id === draggedItem!.id 
+        // Drop item to root level next to another root item
+        customItems = customItems.map(item =>
+          item.id === draggedItem!.id
             ? { ...item, parentId: undefined }
             : item
         );
@@ -217,11 +240,11 @@
     draggedItem = null;
   }
 
-  // Helper function to get items with hierarchy
-  function getHierarchicalItems() {
+  // Reactive declaration for hierarchical items
+  $: hierarchicalItems = (() => {
     const rootItems = customItems.filter(item => !item.parentId);
     const result: (TodoItem & { level: number })[] = [];
-    
+
     function addItemsRecursively(items: TodoItem[], level: number) {
       items.forEach(item => {
         result.push({ ...item, level });
@@ -233,10 +256,10 @@
         }
       });
     }
-    
+
     addItemsRecursively(rootItems, 0);
     return result;
-  }
+  })();
 
   function close() {
     dispatch('close');
@@ -364,18 +387,18 @@
               </div>
               {#if customItems.length > 0}
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  💡 Drag tasks onto sections to organize them, or drag them to other positions to reorder
+                  💡 Drag items onto sections to nest them, or drag to other positions to reorder. Sections can be nested within other sections.
                 </p>
               {/if}
             </div>
 
             <div class="space-y-2 max-h-40 overflow-y-auto">
-              {#each getHierarchicalItems() as item (item.id)}
-                <div 
-                  class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-move transition-all duration-200 
+              {#each hierarchicalItems as item (item.id)}
+                <div
+                  class="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-move transition-all duration-200
                     {draggedItem?.id === item.id ? 'opacity-50 scale-95' : ''}
                     {item.isSection ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700' : ''}
-                    {draggedItem && draggedItem.id !== item.id && item.isSection && !draggedItem.isSection ? 'ring-2 ring-blue-300 dark:ring-blue-600' : ''}"
+                    {draggedItem && draggedItem.id !== item.id && item.isSection && !(draggedItem.isSection && isDescendantOf(item.id, draggedItem.id)) ? 'ring-2 ring-blue-300 dark:ring-blue-600' : ''}"
                   style="margin-left: {item.level * 20}px"
                   draggable="true"
                   on:dragstart={(e) => handleDragStart(e, item)}
