@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
   import { todoStore } from '../stores';
   import type { TodoItem } from '../types';
 
@@ -7,8 +8,32 @@
   export let allItems: TodoItem[];
   export let depth: number = 0;
 
+  let sectionExpanded = true;
+  let timeRemaining = '';
+  let timeInterval: NodeJS.Timeout;
+
   $: childItems = allItems.filter(child => child.parentId === item.id);
   $: indentClass = `ml-${depth * 4}`;
+  
+  onMount(() => {
+    if (!item.isSection) {
+      timeRemaining = getTimeUntilReset(item.resetTime);
+      // Update time remaining every minute
+      timeInterval = setInterval(() => {
+        timeRemaining = getTimeUntilReset(item.resetTime);
+      }, 60000);
+    }
+  });
+
+  onDestroy(() => {
+    if (timeInterval) {
+      clearInterval(timeInterval);
+    }
+  });
+
+  function toggleSectionExpanded() {
+    sectionExpanded = !sectionExpanded;
+  }
 
   function toggleStatus() {
     if (!item.isSection) {
@@ -26,6 +51,55 @@
       return `Weekly ${dayName} at ${resetTime.time}`;
     }
   }
+
+  function getTimeUntilReset(resetTime: typeof item.resetTime): string {
+    const now = new Date();
+    let nextReset: Date;
+
+    if (resetTime.type === 'daily') {
+      const [hours, minutes] = resetTime.time.split(':').map(Number);
+      nextReset = new Date(now);
+      nextReset.setHours(hours, minutes, 0, 0);
+      
+      // If reset time has passed today, move to tomorrow
+      if (now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+    } else {
+      const [hours, minutes] = resetTime.time.split(':').map(Number);
+      const targetDay = resetTime.weekday || 0;
+      nextReset = new Date(now);
+      
+      // Calculate days until target weekday
+      const currentDay = now.getDay();
+      const daysUntilTarget = (targetDay - currentDay + 7) % 7;
+      
+      nextReset.setDate(nextReset.getDate() + daysUntilTarget);
+      nextReset.setHours(hours, minutes, 0, 0);
+      
+      // If it's the same day but time has passed, move to next week
+      if (daysUntilTarget === 0 && now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 7);
+      }
+    }
+
+    const timeDiff = nextReset.getTime() - now.getTime();
+    
+    if (timeDiff <= 0) return 'Reset now';
+    
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return `${days}d ${remainingHours}h remaining`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m remaining`;
+    } else {
+      return `${minutes}m remaining`;
+    }
+  }
 </script>
 
 <div class="space-y-1" style="margin-left: {depth * 1.5}rem">
@@ -35,7 +109,13 @@
   >
     {#if item.isSection}
       <!-- Section header -->
-      <div class="flex items-center gap-2 flex-1">
+      <button
+        on:click={toggleSectionExpanded}
+        class="flex items-center gap-2 flex-1 text-left hover:bg-gray-200 dark:hover:bg-gray-600 rounded p-1 -m-1 transition-colors"
+      >
+        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transform transition-transform {sectionExpanded ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
         </svg>
@@ -45,7 +125,7 @@
             <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.description}</p>
           {/if}
         </div>
-      </div>
+      </button>
     {:else}
       <!-- Todo item -->
       <button
@@ -64,7 +144,7 @@
       </button>
       
       <div class="flex-1">
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between">
           <h4 
             class="font-medium transition-colors"
             class:text-gray-900={item.status === 'pending'}
@@ -75,9 +155,14 @@
           >
             {item.name}
           </h4>
-          <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
-            {formatResetTime(item.resetTime)}
-          </span>
+          <div class="text-right ml-2">
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              {formatResetTime(item.resetTime)}
+            </div>
+            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+              {timeRemaining}
+            </div>
+          </div>
         </div>
         {#if item.description}
           <p 
@@ -95,12 +180,14 @@
   </div>
 
   <!-- Render child items -->
-  {#each childItems as childItem (childItem.id)}
-    <svelte:self 
-      item={childItem} 
-      {projectId} 
-      {allItems} 
-      depth={depth + 1}
-    />
-  {/each}
+  {#if !item.isSection || sectionExpanded}
+    {#each childItems as childItem (childItem.id)}
+      <svelte:self 
+        item={childItem} 
+        {projectId} 
+        {allItems} 
+        depth={depth + 1}
+      />
+    {/each}
+  {/if}
 </div>
