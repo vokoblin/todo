@@ -6,6 +6,7 @@
   import Header from './Header.svelte';
 
   let showCreateModal = false;
+  let editingProject: TodoProject | null = null;
   let projects: TodoProject[] = [];
 
   todoStore.subscribe(data => {
@@ -13,11 +14,18 @@
   });
 
   function openCreateModal() {
+    editingProject = null;
+    showCreateModal = true;
+  }
+
+  function openEditModal(event: CustomEvent<TodoProject>) {
+    editingProject = event.detail;
     showCreateModal = true;
   }
 
   function closeCreateModal() {
     showCreateModal = false;
+    editingProject = null;
   }
 </script>
 
@@ -60,12 +68,12 @@
   {:else}
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
       {#each projects as project (project.id)}
-        <ProjectCard {project} />
+        <ProjectCard {project} on:edit={openEditModal} />
       {/each}
     </div>
   {/if}
 </main>
 
 {#if showCreateModal}
-  <CreateProjectModal on:close={closeCreateModal} />
+  <CreateProjectModal {editingProject} on:close={closeCreateModal} />
 {/if}

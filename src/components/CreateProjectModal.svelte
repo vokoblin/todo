@@ -5,10 +5,12 @@
 
   const dispatch = createEventDispatcher();
 
+  export let editingProject: TodoProject | null = null;
+
   let showPresets = true;
   let presets: PresetProject[] = [];
   let selectedPreset: PresetProject | null = null;
-  
+
   // Custom project form
   let projectName = '';
   let projectDescription = '';
@@ -19,6 +21,14 @@
 
   onMount(async () => {
     await loadPresets();
+
+    // If editing a project, pre-populate the form
+    if (editingProject) {
+      showPresets = false;
+      projectName = editingProject.name;
+      projectDescription = editingProject.description || '';
+      customItems = JSON.parse(JSON.stringify(editingProject.items)); // Deep clone
+    }
   });
 
   async function loadPresets() {
@@ -85,15 +95,25 @@
   function createCustomProject() {
     if (!projectName.trim()) return;
 
-    const project: TodoProject = {
-      id: generateId(),
-      name: projectName.trim(),
-      description: projectDescription.trim() || undefined,
-      items: customItems,
-      createdAt: Date.now()
-    };
+    if (editingProject) {
+      // Update existing project
+      todoStore.updateProject(editingProject.id, {
+        name: projectName.trim(),
+        description: projectDescription.trim() || undefined,
+        items: customItems
+      });
+    } else {
+      // Create new project
+      const project: TodoProject = {
+        id: generateId(),
+        name: projectName.trim(),
+        description: projectDescription.trim() || undefined,
+        items: customItems,
+        createdAt: Date.now()
+      };
+      todoStore.addProject(project);
+    }
 
-    todoStore.addProject(project);
     close();
   }
 
@@ -231,7 +251,9 @@
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Create New TODO</h2>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+          {editingProject ? 'Edit TODO' : 'Create New TODO'}
+        </h2>
         <button
           on:click={close}
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -284,12 +306,14 @@
         <!-- Custom TODO Creation -->
         <div class="space-y-6">
           <div>
-            <button
-              on:click={() => showPresets = true}
-              class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mb-4"
-            >
-              ← Back to Presets
-            </button>
+            {#if !editingProject}
+              <button
+                on:click={() => showPresets = true}
+                class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 mb-4"
+              >
+                ← Back to Presets
+              </button>
+            {/if}
             
             <div class="space-y-4">
               <div>
@@ -408,7 +432,7 @@
               disabled={!projectName.trim()}
               class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Create TODO
+              {editingProject ? 'Save Changes' : 'Create TODO'}
             </button>
           </div>
         </div>

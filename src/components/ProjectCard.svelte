@@ -1,7 +1,10 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte';
   import { todoStore } from '../stores';
   import type { TodoProject } from '../types';
   import TodoItemComponent from './TodoItemComponent.svelte';
+
+  const dispatch = createEventDispatcher();
 
   export let project: TodoProject;
 
@@ -27,6 +30,10 @@
     if (confirm(`Are you sure you want to delete "${project.name}"?`)) {
       todoStore.deleteProject(project.id);
     }
+  }
+
+  function editProject() {
+    dispatch('edit', project);
   }
 </script>
 
@@ -65,7 +72,17 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
-        
+
+        <button
+          on:click={editProject}
+          class="p-2 rounded-lg text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+          title="Edit TODO"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </button>
+
         <button
           on:click={deleteProject}
           class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
