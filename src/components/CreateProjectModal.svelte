@@ -240,6 +240,25 @@
     draggedItem = null;
   }
 
+  function handleRootDropZoneDragOver(event: DragEvent) {
+    event.preventDefault();
+    if (draggedItem) {
+      event.dataTransfer!.dropEffect = 'move';
+    }
+  }
+
+  function handleRootDropZoneDrop(event: DragEvent) {
+    event.preventDefault();
+    if (draggedItem) {
+      customItems = customItems.map(item =>
+        item.id === draggedItem!.id
+          ? { ...item, parentId: undefined }
+          : item
+      );
+    }
+    draggedItem = null;
+  }
+
   // Reactive declaration for hierarchical items
   $: hierarchicalItems = (() => {
     const rootItems = customItems.filter(item => !item.parentId);
@@ -453,6 +472,18 @@
                   </svg>
                   <p class="text-sm">No tasks or sections yet</p>
                   <p class="text-xs">Click "Add Item" to get started</p>
+                </div>
+              {:else}
+                <!-- Drop zone for moving items back to root -->
+                <div
+                  class="mt-2 p-4 border-2 border-dashed rounded-lg text-center transition-all duration-200
+                    {draggedItem ? 'border-indigo-300 dark:border-indigo-600 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/30'}"
+                  on:dragover={handleRootDropZoneDragOver}
+                  on:drop={handleRootDropZoneDrop}
+                >
+                  <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {draggedItem ? '📦 Drop here to move to root level' : 'Drop items here to move to root level'}
+                  </p>
                 </div>
               {/if}
             </div>
