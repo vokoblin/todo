@@ -148,7 +148,7 @@
   <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Create New Project</h2>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Create New TODO</h2>
         <button
           on:click={close}
           class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
@@ -164,7 +164,7 @@
         <div class="space-y-6">
           <div class="text-center">
             <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Choose a Preset</h3>
-            <p class="text-gray-600 dark:text-gray-300">Start with a pre-configured template or create a custom project</p>
+            <p class="text-gray-600 dark:text-gray-300">Start with a pre-configured template or create a custom TODO</p>
           </div>
 
           <div class="grid gap-4">
@@ -193,12 +193,12 @@
               <svg class="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              <span class="text-sm font-medium text-gray-900 dark:text-white">Create Custom Project</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white">Create Custom TODO</span>
             </button>
           </div>
         </div>
       {:else}
-        <!-- Custom Project Creation -->
+        <!-- Custom TODO Creation -->
         <div class="space-y-6">
           <div>
             <button
@@ -211,13 +211,13 @@
             <div class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Project Name *
+                  TODO Name *
                 </label>
                 <input
                   bind:value={projectName}
                   type="text"
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Enter project name"
+                  placeholder="Enter TODO name"
                 />
               </div>
               
@@ -228,7 +228,7 @@
                 <textarea
                   bind:value={projectDescription}
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="Describe your project"
+                  placeholder="Describe your TODO"
                   rows="2"
                 ></textarea>
               </div>
@@ -286,7 +286,7 @@
               disabled={!projectName.trim()}
               class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              Create Project
+              Create TODO
             </button>
           </div>
         </div>

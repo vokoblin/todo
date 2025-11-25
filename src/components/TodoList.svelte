@@ -36,7 +36,7 @@
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
       </svg>
-      Add TODO Project
+      Add TODO
     </button>
   </div>
 
@@ -45,8 +45,8 @@
       <svg class="w-24 h-24 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
-      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No TODO projects yet</h2>
-      <p class="text-gray-600 dark:text-gray-300 mb-6">Create your first project to start tracking game activities</p>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No TODOs yet</h2>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">Create your first TODO to start tracking game activities</p>
       <button
         on:click={openCreateModal}
         class="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
@@ -54,7 +54,7 @@
         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        Create Your First Project
+        Create Your First TODO
       </button>
     </div>
   {:else}
