@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount, onDestroy } from 'svelte';
   import { todoStore } from '../stores';
   import type { TodoItem } from '../types';
 
@@ -8,9 +9,27 @@
   export let depth: number = 0;
 
   let sectionExpanded = true;
+  let timeRemaining = '';
+  let timeInterval: NodeJS.Timeout;
 
   $: childItems = allItems.filter(child => child.parentId === item.id);
   $: indentClass = `ml-${depth * 4}`;
+  
+  onMount(() => {
+    if (!item.isSection) {
+      timeRemaining = getTimeUntilReset(item.resetTime);
+      // Update time remaining every minute
+      timeInterval = setInterval(() => {
+        timeRemaining = getTimeUntilReset(item.resetTime);
+      }, 60000);
+    }
+  });
+
+  onDestroy(() => {
+    if (timeInterval) {
+      clearInterval(timeInterval);
+    }
+  });
 
   function toggleSectionExpanded() {
     sectionExpanded = !sectionExpanded;
@@ -30,6 +49,55 @@
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const dayName = days[resetTime.weekday || 0];
       return `Weekly ${dayName} at ${resetTime.time}`;
+    }
+  }
+
+  function getTimeUntilReset(resetTime: typeof item.resetTime): string {
+    const now = new Date();
+    let nextReset: Date;
+
+    if (resetTime.type === 'daily') {
+      const [hours, minutes] = resetTime.time.split(':').map(Number);
+      nextReset = new Date(now);
+      nextReset.setHours(hours, minutes, 0, 0);
+      
+      // If reset time has passed today, move to tomorrow
+      if (now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 1);
+      }
+    } else {
+      const [hours, minutes] = resetTime.time.split(':').map(Number);
+      const targetDay = resetTime.weekday || 0;
+      nextReset = new Date(now);
+      
+      // Calculate days until target weekday
+      const currentDay = now.getDay();
+      const daysUntilTarget = (targetDay - currentDay + 7) % 7;
+      
+      nextReset.setDate(nextReset.getDate() + daysUntilTarget);
+      nextReset.setHours(hours, minutes, 0, 0);
+      
+      // If it's the same day but time has passed, move to next week
+      if (daysUntilTarget === 0 && now >= nextReset) {
+        nextReset.setDate(nextReset.getDate() + 7);
+      }
+    }
+
+    const timeDiff = nextReset.getTime() - now.getTime();
+    
+    if (timeDiff <= 0) return 'Reset now';
+    
+    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return `${days}d ${remainingHours}h remaining`;
+    } else if (hours > 0) {
+      return `${hours}h ${minutes}m remaining`;
+    } else {
+      return `${minutes}m remaining`;
     }
   }
 </script>
@@ -76,7 +144,7 @@
       </button>
       
       <div class="flex-1">
-        <div class="flex items-center justify-between">
+        <div class="flex items-start justify-between">
           <h4 
             class="font-medium transition-colors"
             class:text-gray-900={item.status === 'pending'}
@@ -87,9 +155,14 @@
           >
             {item.name}
           </h4>
-          <span class="text-xs text-gray-500 dark:text-gray-400 ml-2">
-            {formatResetTime(item.resetTime)}
-          </span>
+          <div class="text-right ml-2">
+            <div class="text-xs text-gray-500 dark:text-gray-400">
+              {formatResetTime(item.resetTime)}
+            </div>
+            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
+              {timeRemaining}
+            </div>
+          </div>
         </div>
         {#if item.description}
           <p 
