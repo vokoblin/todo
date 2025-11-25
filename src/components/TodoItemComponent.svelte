@@ -7,8 +7,14 @@
   export let allItems: TodoItem[];
   export let depth: number = 0;
 
+  let sectionExpanded = true;
+
   $: childItems = allItems.filter(child => child.parentId === item.id);
   $: indentClass = `ml-${depth * 4}`;
+
+  function toggleSectionExpanded() {
+    sectionExpanded = !sectionExpanded;
+  }
 
   function toggleStatus() {
     if (!item.isSection) {
@@ -35,7 +41,13 @@
   >
     {#if item.isSection}
       <!-- Section header -->
-      <div class="flex items-center gap-2 flex-1">
+      <button
+        on:click={toggleSectionExpanded}
+        class="flex items-center gap-2 flex-1 text-left hover:bg-gray-200 dark:hover:bg-gray-600 rounded p-1 -m-1 transition-colors"
+      >
+        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400 transform transition-transform {sectionExpanded ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
         <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
         </svg>
@@ -45,7 +57,7 @@
             <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.description}</p>
           {/if}
         </div>
-      </div>
+      </button>
     {:else}
       <!-- Todo item -->
       <button
@@ -95,12 +107,14 @@
   </div>
 
   <!-- Render child items -->
-  {#each childItems as childItem (childItem.id)}
-    <svelte:self 
-      item={childItem} 
-      {projectId} 
-      {allItems} 
-      depth={depth + 1}
-    />
-  {/each}
+  {#if !item.isSection || sectionExpanded}
+    {#each childItems as childItem (childItem.id)}
+      <svelte:self 
+        item={childItem} 
+        {projectId} 
+        {allItems} 
+        depth={depth + 1}
+      />
+    {/each}
+  {/if}
 </div>
