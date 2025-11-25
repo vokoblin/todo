@@ -297,7 +297,7 @@
 
 {#if showItemForm && editingItem}
   <!-- Item Form Modal -->
-  <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-60">
+  <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[70]">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
         {editingItem.isSection ? 'Add Section' : 'Add Task'}
