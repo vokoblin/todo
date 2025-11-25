@@ -128,10 +128,10 @@
 </script>
 
 <div class="space-y-1" style="margin-left: {depth * 0.75}rem">
-  <div 
-    class="flex items-center gap-3 p-3 rounded-lg transition-colors"
-    class:"bg-white dark:bg-gray-800 border-l-4 border-l-indigo-500 shadow-sm"={item.isSection}
-    class:"bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"={!item.isSection}
+  <div
+    class="flex items-center gap-3 p-3 rounded-lg transition-colors {item.isSection
+      ? 'bg-white dark:bg-gray-800 border-l-4 border-l-indigo-500 shadow-sm'
+      : 'bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}"
     class:opacity-60={item.status === 'completed' && !item.isSection}
   >
     {#if item.isSection}
