@@ -11,9 +11,19 @@
   let timeRemaining = '';
   let timeInterval: NodeJS.Timeout;
 
-  $: sectionExpanded = item.isSection 
-    ? ($todoStore.uiState?.expandedSections?.[item.id] ?? true)
-    : true;
+  let sectionExpanded = true;
+  
+  $: {
+    if (item.isSection) {
+      if ($todoStore.uiState && $todoStore.uiState.expandedSections) {
+        sectionExpanded = $todoStore.uiState.expandedSections[item.id] === true;
+      } else {
+        sectionExpanded = false;
+      }
+    } else {
+      sectionExpanded = true;
+    }
+  }
   $: childItems = allItems.filter(child => child.parentId === item.id);
   
   onMount(() => {
@@ -44,49 +54,47 @@
     }
   }
 
+  const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
   function formatResetTime(resetTime: typeof item.resetTime): string {
     if (resetTime.type === 'daily') {
       return `Daily at ${resetTime.time}`;
-    } else {
-      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-      const dayName = days[resetTime.weekday || 0];
-      return `Weekly ${dayName} at ${resetTime.time}`;
     }
+    const dayName = WEEKDAYS[resetTime.weekday || 0];
+    return `Weekly ${dayName} at ${resetTime.time}`;
   }
 
-  function getTimeUntilReset(resetTime: typeof item.resetTime): string {
-    const now = new Date();
-    let nextReset: Date;
+  function parseTimeString(timeStr: string): [number, number] {
+    return timeStr.split(':').map(Number) as [number, number];
+  }
 
-    if (resetTime.type === 'daily') {
-      const [hours, minutes] = resetTime.time.split(':').map(Number);
-      nextReset = new Date(now);
-      nextReset.setHours(hours, minutes, 0, 0);
-      
-      // If reset time has passed today, move to tomorrow
-      if (now >= nextReset) {
-        nextReset.setDate(nextReset.getDate() + 1);
-      }
-    } else {
-      const [hours, minutes] = resetTime.time.split(':').map(Number);
-      const targetDay = resetTime.weekday || 0;
-      nextReset = new Date(now);
-      
-      // Calculate days until target weekday
-      const currentDay = now.getDay();
-      const daysUntilTarget = (targetDay - currentDay + 7) % 7;
-      
-      nextReset.setDate(nextReset.getDate() + daysUntilTarget);
-      nextReset.setHours(hours, minutes, 0, 0);
-      
-      // If it's the same day but time has passed, move to next week
-      if (daysUntilTarget === 0 && now >= nextReset) {
-        nextReset.setDate(nextReset.getDate() + 7);
-      }
-    }
-
-    const timeDiff = nextReset.getTime() - now.getTime();
+  function calculateNextDailyReset(now: Date, hours: number, minutes: number): Date {
+    const nextReset = new Date(now);
+    nextReset.setHours(hours, minutes, 0, 0);
     
+    if (now >= nextReset) {
+      nextReset.setDate(nextReset.getDate() + 1);
+    }
+    
+    return nextReset;
+  }
+
+  function calculateNextWeeklyReset(now: Date, hours: number, minutes: number, targetDay: number): Date {
+    const nextReset = new Date(now);
+    const currentDay = now.getDay();
+    const daysUntilTarget = (targetDay - currentDay + 7) % 7;
+    
+    nextReset.setDate(nextReset.getDate() + daysUntilTarget);
+    nextReset.setHours(hours, minutes, 0, 0);
+    
+    if (daysUntilTarget === 0 && now >= nextReset) {
+      nextReset.setDate(nextReset.getDate() + 7);
+    }
+    
+    return nextReset;
+  }
+
+  function formatTimeDifference(timeDiff: number): string {
     if (timeDiff <= 0) return 'Reset now';
     
     const hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -101,6 +109,21 @@
     } else {
       return `${minutes}m remaining`;
     }
+  }
+
+  function getTimeUntilReset(resetTime: typeof item.resetTime): string {
+    const now = new Date();
+    const [hours, minutes] = parseTimeString(resetTime.time);
+    
+    let nextReset: Date;
+    if (resetTime.type === 'daily') {
+      nextReset = calculateNextDailyReset(now, hours, minutes);
+    } else {
+      nextReset = calculateNextWeeklyReset(now, hours, minutes, resetTime.weekday || 0);
+    }
+
+    const timeDiff = nextReset.getTime() - now.getTime();
+    return formatTimeDifference(timeDiff);
   }
 </script>
 
