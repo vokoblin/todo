@@ -131,16 +131,21 @@
     };
   }
 
+  function editItem(item: TodoItem) {
+    showItemForm = true;
+    editingItem = JSON.parse(JSON.stringify(item)); // Deep clone
+  }
+
   function saveItem() {
     if (!editingItem?.name.trim()) return;
-    
+
     const itemIndex = customItems.findIndex(item => item.id === editingItem!.id);
     if (itemIndex >= 0) {
       customItems[itemIndex] = { ...editingItem };
     } else {
       customItems = [...customItems, { ...editingItem }];
     }
-    
+
     cancelItemEdit();
   }
 
@@ -397,8 +402,18 @@
                   <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-400 cursor-grab">⋮⋮</span>
                     <button
+                      on:click={() => editItem(item)}
+                      class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      title="Edit item"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
                       on:click={() => removeItem(item.id)}
                       class="text-gray-400 hover:text-red-600"
+                      title="Delete item"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -446,7 +461,11 @@
   <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[70]">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
       <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-        {editingItem.isSection ? 'Add Section' : 'Add Task'}
+        {#if customItems.some(item => item.id === editingItem.id)}
+          {editingItem.isSection ? 'Edit Section' : 'Edit Task'}
+        {:else}
+          {editingItem.isSection ? 'Add Section' : 'Add Task'}
+        {/if}
       </h3>
       
       <div class="space-y-4">
@@ -544,7 +563,11 @@
           disabled={!editingItem.name.trim()}
           class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Add {editingItem.isSection ? 'Section' : 'Task'}
+          {#if customItems.some(item => item.id === editingItem.id)}
+            Save {editingItem.isSection ? 'Section' : 'Task'}
+          {:else}
+            Add {editingItem.isSection ? 'Section' : 'Task'}
+          {/if}
         </button>
       </div>
     </div>
