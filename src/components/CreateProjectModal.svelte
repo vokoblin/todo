@@ -50,7 +50,7 @@
       const presetNames = ['mmo-dailies', 'gacha-game', 'where-winds-meet'];
       const loadedPresets = await Promise.all(
         presetNames.map(async (name) => {
-          const response = await fetch(`/presets/${name}.json`);
+          const response = await fetch(`/todo/presets/${name}.json`);
           if (response.ok) {
             return await response.json();
           }
