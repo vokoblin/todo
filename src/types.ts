@@ -6,6 +6,8 @@ export type ResetTime = {
 
 export type TodoStatus = 'pending' | 'completed';
 
+export type TodoItemType = 'checkbox' | 'counter';
+
 export type TodoItem = {
   id: string;
   name: string;
@@ -15,6 +17,9 @@ export type TodoItem = {
   lastReset?: number; // timestamp
   parentId?: string; // for nested items
   isSection: boolean;
+  itemType?: TodoItemType; // Type of item: checkbox (default) or counter
+  counterTarget?: number; // For counter type: target count to reach
+  counterCurrent?: number; // For counter type: current count
 };
 
 export type TodoProject = {
@@ -40,5 +45,5 @@ export type TodoData = {
 export type PresetProject = {
   name: string;
   description?: string;
-  items: Omit<TodoItem, 'id' | 'status' | 'lastReset'>[];
+  items: Omit<TodoItem, 'id' | 'status' | 'lastReset' | 'counterCurrent'>[];
 };

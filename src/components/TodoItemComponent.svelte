@@ -115,9 +115,27 @@
   }
 
   function toggleStatus() {
-    if (!item.isSection) {
-      const newStatus = item.status === 'completed' ? 'pending' : 'completed';
-      todoStore.updateTodoStatus(projectId, item.id, newStatus);
+    if (item.isSection) return;
+
+    // For counter items, don't toggle - use increment/decrement instead
+    if (item.itemType === 'counter') return;
+
+    // For checkbox items, toggle status
+    const newStatus = item.status === 'completed' ? 'pending' : 'completed';
+    todoStore.updateTodoStatus(projectId, item.id, newStatus);
+  }
+
+  function incrementCounter(event: Event) {
+    event.stopPropagation();
+    if (item.itemType === 'counter' && item.counterCurrent !== undefined && item.counterTarget !== undefined) {
+      todoStore.incrementCounter(projectId, item.id);
+    }
+  }
+
+  function decrementCounter(event: Event) {
+    event.stopPropagation();
+    if (item.itemType === 'counter' && item.counterCurrent !== undefined) {
+      todoStore.decrementCounter(projectId, item.id);
     }
   }
 
@@ -214,17 +232,47 @@
       </button>
     {:else}
       <!-- Todo item -->
-      <button
-        on:click={toggleStatus}
-        class={checkboxClasses}
-      >
-        {#if item.status === 'completed'}
-          <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-          </svg>
-        {/if}
-      </button>
-      
+      {#if item.itemType === 'counter'}
+        <!-- Counter display and controls -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button
+            on:click={decrementCounter}
+            disabled={item.counterCurrent === 0}
+            class="w-6 h-6 rounded border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4" />
+            </svg>
+          </button>
+          <div class="flex items-center justify-center min-w-[3rem] px-2 py-1 rounded bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700">
+            <span class="text-sm font-bold text-indigo-700 dark:text-indigo-300">
+              {item.counterCurrent ?? 0}/{item.counterTarget ?? 0}
+            </span>
+          </div>
+          <button
+            on:click={incrementCounter}
+            disabled={item.counterCurrent >= (item.counterTarget ?? 0)}
+            class="w-6 h-6 rounded border-2 border-indigo-400 dark:border-indigo-500 flex items-center justify-center transition-all duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <svg class="w-3 h-3 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+      {:else}
+        <!-- Checkbox for regular items -->
+        <button
+          on:click={toggleStatus}
+          class={checkboxClasses}
+        >
+          {#if item.status === 'completed'}
+            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+            </svg>
+          {/if}
+        </button>
+      {/if}
+
       <div class="flex-1">
         <div class="flex items-center justify-between gap-3">
           <h4 class={titleClasses}>

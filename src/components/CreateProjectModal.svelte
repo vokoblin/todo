@@ -82,7 +82,8 @@
         id: idMap.get(item.id)!,
         status: 'pending' as const,
         lastReset: item.resetTime ? 0 : undefined,
-        parentId: item.parentId ? idMap.get(item.parentId) || null : null
+        parentId: item.parentId ? idMap.get(item.parentId) || null : null,
+        counterCurrent: item.itemType === 'counter' ? 0 : undefined
       })),
       createdAt: Date.now(),
       isPreset: true
@@ -137,7 +138,10 @@
       resetTime: undefined,
       lastReset: undefined,
       parentId: undefined,
-      isSection: false
+      isSection: false,
+      itemType: 'checkbox',
+      counterTarget: undefined,
+      counterCurrent: undefined
     };
   }
 
@@ -148,6 +152,20 @@
 
   function saveItem() {
     if (!editingItem?.name.trim()) return;
+
+    // Ensure counter items have proper initialization
+    if (editingItem.itemType === 'counter') {
+      if (editingItem.counterCurrent === undefined || editingItem.counterCurrent === null) {
+        editingItem.counterCurrent = 0;
+      }
+      if (!editingItem.counterTarget) {
+        editingItem.counterTarget = 5; // Default target
+      }
+    } else {
+      // Not a counter, clear counter fields
+      editingItem.counterTarget = undefined;
+      editingItem.counterCurrent = undefined;
+    }
 
     const itemIndex = customItems.findIndex(item => item.id === editingItem!.id);
     if (itemIndex >= 0) {
@@ -638,6 +656,42 @@
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
           />
         </div>
+
+        {#if !editingItem.isSection}
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item Type</label>
+            <select
+              bind:value={editingItem.itemType}
+              on:change={() => {
+                if (editingItem.itemType === 'counter') {
+                  editingItem.counterTarget = 5;
+                  editingItem.counterCurrent = 0;
+                } else {
+                  editingItem.counterTarget = undefined;
+                  editingItem.counterCurrent = undefined;
+                }
+              }}
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="checkbox">Checkbox (Complete once)</option>
+              <option value="counter">Counter (Complete multiple times)</option>
+            </select>
+          </div>
+
+          {#if editingItem.itemType === 'counter'}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Target Count</label>
+              <input
+                bind:value={editingItem.counterTarget}
+                type="number"
+                min="1"
+                max="999"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+              />
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Number of times to complete this task</p>
+            </div>
+          {/if}
+        {/if}
 
         {#if !editingItem.isSection}
           <div>

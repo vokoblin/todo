@@ -100,7 +100,7 @@ function createTodoStore() {
             if (project.id === projectId) {
               return {
                 ...project,
-                items: project.items.map(item => 
+                items: project.items.map(item =>
                   item.id === itemId ? { ...item, status } : item
                 )
               };
@@ -114,7 +114,73 @@ function createTodoStore() {
         return newData;
       });
     },
-    
+
+    // Increment counter for counter-type items
+    incrementCounter: (projectId: string, itemId: string) => {
+      update(data => {
+        const newData = {
+          ...data,
+          projects: data.projects.map(project => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                items: project.items.map(item => {
+                  if (item.id === itemId && item.itemType === 'counter') {
+                    const newCurrent = (item.counterCurrent ?? 0) + 1;
+                    const target = item.counterTarget ?? 0;
+                    return {
+                      ...item,
+                      counterCurrent: newCurrent,
+                      status: newCurrent >= target ? 'completed' : 'pending'
+                    };
+                  }
+                  return item;
+                })
+              };
+            }
+            return project;
+          })
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+        }
+        return newData;
+      });
+    },
+
+    // Decrement counter for counter-type items
+    decrementCounter: (projectId: string, itemId: string) => {
+      update(data => {
+        const newData = {
+          ...data,
+          projects: data.projects.map(project => {
+            if (project.id === projectId) {
+              return {
+                ...project,
+                items: project.items.map(item => {
+                  if (item.id === itemId && item.itemType === 'counter') {
+                    const newCurrent = Math.max(0, (item.counterCurrent ?? 0) - 1);
+                    const target = item.counterTarget ?? 0;
+                    return {
+                      ...item,
+                      counterCurrent: newCurrent,
+                      status: newCurrent >= target ? 'completed' : 'pending'
+                    };
+                  }
+                  return item;
+                })
+              };
+            }
+            return project;
+          })
+        };
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+        }
+        return newData;
+      });
+    },
+
     // Add todo item to project
     addTodoItem: (projectId: string, item: TodoItem) => {
       update(data => {
@@ -172,6 +238,10 @@ function createTodoStore() {
               // Check if item needs to be reset
               if (shouldReset(item.resetTime, item.lastReset, now)) {
                 hasChanges = true;
+                // For counter items, also reset the counter
+                if (item.itemType === 'counter') {
+                  return { ...item, status: 'pending', lastReset: now, counterCurrent: 0 };
+                }
                 return { ...item, status: 'pending', lastReset: now };
               }
 
@@ -327,6 +397,23 @@ function createTodoStore() {
               if (typeof item.isSection !== 'boolean') {
                 item.isSection = false;
               }
+              // Ensure itemType has a default
+              if (!item.itemType) {
+                item.itemType = 'checkbox';
+              }
+              // Ensure counter items have proper fields
+              if (item.itemType === 'counter') {
+                if (typeof item.counterCurrent !== 'number') {
+                  item.counterCurrent = 0;
+                }
+                if (typeof item.counterTarget !== 'number') {
+                  item.counterTarget = 5; // Default target
+                }
+              } else {
+                // Not a counter, remove counter fields
+                item.counterCurrent = undefined;
+                item.counterTarget = undefined;
+              }
               // Ensure resetTime and lastReset are consistent
               if (item.resetTime && typeof item.lastReset !== 'number') {
                 item.lastReset = 0; // Set to 0 so it will reset on first check
@@ -367,6 +454,23 @@ function createTodoStore() {
             }
             if (typeof item.isSection !== 'boolean') {
               item.isSection = false;
+            }
+            // Ensure itemType has a default
+            if (!item.itemType) {
+              item.itemType = 'checkbox';
+            }
+            // Ensure counter items have proper fields
+            if (item.itemType === 'counter') {
+              if (typeof item.counterCurrent !== 'number') {
+                item.counterCurrent = 0;
+              }
+              if (typeof item.counterTarget !== 'number') {
+                item.counterTarget = 5; // Default target
+              }
+            } else {
+              // Not a counter, remove counter fields
+              item.counterCurrent = undefined;
+              item.counterTarget = undefined;
             }
             // Ensure resetTime and lastReset are consistent
             if (item.resetTime && typeof item.lastReset !== 'number') {
