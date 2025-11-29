@@ -42,8 +42,11 @@ export type TodoData = {
   };
 };
 
+export type PresetCategory = 'example' | 'community';
+
 export type PresetProject = {
   name: string;
   description?: string;
+  category?: PresetCategory; // Category for organizing presets
   items: Omit<TodoItem, 'id' | 'status' | 'lastReset' | 'counterCurrent'>[];
 };

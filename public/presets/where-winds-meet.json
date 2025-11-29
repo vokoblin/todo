@@ -1,0 +1,445 @@
+{
+  "name": "Where Winds Meet",
+  "description": "Daily and weekly tasks for Where Winds Meet MMO",
+  "category": "community",
+  "items": [
+    {
+      "id": "daily-section",
+      "name": "Daily",
+      "description": "",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true
+    },
+    {
+      "id": "weekly-section",
+      "name": "Weekly",
+      "description": "",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true
+    },
+    {
+      "id": "sword-trial-boss",
+      "name": "Sword Trial [Boss x2]",
+      "description": "-120 Energy -> Kill both bosses once",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "daily-section",
+      "isSection": false
+    },
+    {
+      "id": "sword-trial-join",
+      "name": "Sword Trial [Join Battle]",
+      "description": "-20 Energy",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "daily-section",
+      "isSection": false
+    },
+    {
+      "id": "hero-realm",
+      "name": "Hero's Realm",
+      "description": "Kill both bosses once",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "weekly-section",
+      "isSection": false
+    },
+    {
+      "id": "guild-hero-realm",
+      "name": "Guild Hero's Realm",
+      "description": "Kill both bosses once",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "weekly-section",
+      "isSection": false
+    },
+    {
+      "id": "combat-dev-shop",
+      "name": "Season>Shop>Combat Development",
+      "description": "Fish currency shop (18,900 Jade Fish)",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true,
+      "parentId": "weekly-section"
+    },
+    {
+      "id": "martial-arts-tips-1",
+      "name": "Martial Arts: Custom Tips",
+      "description": "2400 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "combat-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "martial-arts-tips-2",
+      "name": "Martial Arts: Custom Tips",
+      "description": "3200 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "combat-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "inner-way-chest-1",
+      "name": "Inner Way Note: Chest",
+      "description": "3000 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "combat-dev-shop"
+    },
+    {
+      "id": "inner-way-chest-2",
+      "name": "Inner Way Note: Chest",
+      "description": "3000 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "combat-dev-shop"
+    },
+    {
+      "id": "mystic-breakthrough",
+      "name": "Mystic Skills Breakthrough Support Box",
+      "description": "5000 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "combat-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "life-supplies",
+      "name": "Life Supplies Support Box",
+      "description": "800 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "combat-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "oscillating-jade",
+      "name": "Oscillating Jade",
+      "description": "1500 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "combat-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "profession-dev-shop",
+      "name": "Season>Shop>Profession Development",
+      "description": "Fish currency shop (4250 Jade Fish) Only to MAX professions",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true,
+      "parentId": "weekly-section"
+    },
+    {
+      "id": "career-notebook",
+      "name": "Career Notebook",
+      "description": "2000 Jade Fish",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "profession-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "scholar-giftbox",
+      "name": "Scholar Giftbox",
+      "description": "750 Jade Fish (Only if needed)",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "profession-dev-shop"
+    },
+    {
+      "id": "healer-giftbox",
+      "name": "Healer Giftbox",
+      "description": "750 Jade Fish (Only if needed)",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "profession-dev-shop"
+    },
+    {
+      "id": "custom-career-giftbox",
+      "name": "Custom Career Giftbox",
+      "description": "750 Jade Fish (Only if needed)",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "profession-dev-shop",
+      "isSection": false
+    },
+    {
+      "id": "battle-pass-shop",
+      "name": "Battle Pass>Shop",
+      "description": "26 Battle Pass Tokens",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "weekly-section",
+      "isSection": true
+    },
+    {
+      "id": "bp-martial-breakthrough",
+      "name": "Custom Martial Arts Breakthrough Chest",
+      "description": "4 Battle Pass Tokens",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "battle-pass-shop",
+      "isSection": false
+    },
+    {
+      "id": "bp-mystic-breakthrough",
+      "name": "Mystic Skills Breakthrough Support Box",
+      "description": "15 Battle Pass Tokens",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "battle-pass-shop",
+      "isSection": false
+    },
+    {
+      "id": "bp-martial-upgrade",
+      "name": "Custom Martial Arts Upgrade Chest",
+      "description": "2 Battle Pass Tokens",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "battle-pass-shop",
+      "isSection": false
+    },
+    {
+      "id": "bp-peach-blossom",
+      "name": "Peach Blossom Pack",
+      "description": "5 Battle Pass Tokens",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "battle-pass-shop",
+      "isSection": false
+    },
+    {
+      "id": "lingering-melody",
+      "name": "Lingering Melody",
+      "description": "Pull currency (600 Echo Jade)",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true,
+      "parentId": "weekly-section"
+    },
+    {
+      "id": "appearance-exchange",
+      "name": "Season>Shop>Appearance Exchange",
+      "description": "x1 = 200 Echo Jade",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "lingering-melody",
+      "isSection": false
+    },
+    {
+      "id": "shop-items",
+      "name": "Shop>Items",
+      "description": "x2 = 400 Echo Jade",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "lingering-melody",
+      "isSection": false
+    },
+    {
+      "id": "upgrade-materials",
+      "name": "Upgrade materials",
+      "description": "Extra",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true
+    },
+    {
+      "id": "harvestfall-general",
+      "name": "Harvestfall Village>General Goods",
+      "description": "19800 Coins",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "upgrade-materials",
+      "isSection": true
+    },
+    {
+      "id": "harvestfall-fur",
+      "name": "Coarse Fur",
+      "description": "9900 Coins",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "harvestfall-general",
+      "isSection": false
+    },
+    {
+      "id": "harvestfall-ore",
+      "name": "Raw Ore",
+      "description": "9900 Coins",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "parentId": "harvestfall-general",
+      "isSection": false
+    },
+    {
+      "id": "kaifeng-general",
+      "name": "Kaifeng City>General Goods",
+      "description": "19800 Coins",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true,
+      "parentId": "upgrade-materials"
+    },
+    {
+      "id": "kaifeng-fur",
+      "name": "Coarse Fur",
+      "description": "9900 Coins",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "kaifeng-general"
+    },
+    {
+      "id": "kaifeng-ore",
+      "name": "Raw Ore",
+      "description": "9900 Coins",
+      "resetTime": {
+        "type": "weekly",
+        "time": "21:00",
+        "weekday": 0
+      },
+      "isSection": false,
+      "parentId": "kaifeng-general"
+    },
+    {
+      "id": "cosmetics",
+      "name": "Cosmetics",
+      "description": "Extra",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "isSection": true
+    },
+    {
+      "id": "blissful-retreat",
+      "name": "Blissful Retreat>Mirror",
+      "description": "Use x2 time daily to unlock hair styles",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "cosmetics",
+      "isSection": false
+    },
+    {
+      "id": "multiplayer-events",
+      "name": "Multiplayer Events + Solo Activities",
+      "description": "Extra",
+      "resetTime": {
+        "type": "daily",
+        "time": "21:00"
+      },
+      "parentId": "weekly-section",
+      "isSection": true
+    },
+    {
+      "id": "fireworks-show",
+      "name": "Fireworks Show",
+      "description": "Online Mode>Every Friday/Saturday at 20:30",
+      "resetTime": {
+        "type": "weekly",
+        "time": "20:30",
+        "weekday": 6
+      },
+      "parentId": "multiplayer-events",
+      "isSection": false
+    }
+  ]
+}

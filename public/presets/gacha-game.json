@@ -1,6 +1,7 @@
 {
   "name": "Gacha Game Dailies",
   "description": "Daily tasks for gacha/mobile games",
+  "category": "example",
   "items": [
     {
       "id": "daily-section",

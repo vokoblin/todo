@@ -1,6 +1,7 @@
 {
   "name": "MMO Daily Tasks",
   "description": "Common daily tasks for MMO games",
+  "category": "example",
   "items": [
     {
       "id": "rewards-section",
