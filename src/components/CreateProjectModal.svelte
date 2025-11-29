@@ -346,11 +346,11 @@
   }
 </script>
 
-<div 
+<div
   class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
   on:click={handleBackdropClick}
 >
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-5xl w-full max-h-[95vh] overflow-y-auto">
     <div class="p-6">
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -467,7 +467,7 @@
             </div>
 
             <div
-              class="space-y-2 max-h-40 overflow-y-auto"
+              class="space-y-2 max-h-96 overflow-y-auto"
               bind:this={itemsContainer}
               on:dragover={handleContainerDragOver}
             >
