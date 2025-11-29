@@ -169,8 +169,8 @@
       </button>
       
       <div class="flex-1">
-        <div class="flex items-start justify-between">
-          <h4 
+        <div class="flex items-center justify-between gap-3">
+          <h4
             class="font-medium transition-colors"
             class:text-gray-900={item.status === 'pending'}
             class:dark:text-white={item.status === 'pending'}
@@ -180,26 +180,28 @@
           >
             {item.name}
           </h4>
-          <div class="text-right ml-2">
-            <div class="text-xs text-gray-500 dark:text-gray-400">
-              {formatResetTime(item.resetTime)}
-            </div>
-            <div class="text-xs text-indigo-600 dark:text-indigo-400 font-medium">
-              {timeRemaining}
-            </div>
-          </div>
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
+            {formatResetTime(item.resetTime)}
+          </span>
         </div>
-        {#if item.description}
-          <p 
-            class="text-sm mt-1 transition-colors"
-            class:text-gray-600={item.status === 'pending'}
-            class:dark:text-gray-300={item.status === 'pending'}
-            class:text-gray-400={item.status === 'completed'}
-            class:dark:text-gray-500={item.status === 'completed'}
-          >
-            {item.description}
-          </p>
-        {/if}
+        <div class="flex items-center justify-between gap-3 mt-1">
+          {#if item.description}
+            <p
+              class="text-sm transition-colors"
+              class:text-gray-600={item.status === 'pending'}
+              class:dark:text-gray-300={item.status === 'pending'}
+              class:text-gray-400={item.status === 'completed'}
+              class:dark:text-gray-500={item.status === 'completed'}
+            >
+              {item.description}
+            </p>
+          {:else}
+            <div></div>
+          {/if}
+          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 flex-shrink-0">
+            {timeRemaining}
+          </span>
+        </div>
       </div>
     {/if}
   </div>

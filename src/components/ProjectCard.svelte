@@ -68,28 +68,16 @@
   class="rounded-xl shadow-sm border overflow-hidden transition-all duration-300 {expanded ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700 shadow-lg' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}"
 >
   <div class="p-6">
+    <!-- Header with title and actions -->
     <div class="flex items-start justify-between mb-4">
-      <div class="flex-1">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{project.name}</h3>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{project.name}</h3>
         {#if project.description}
-          <p class="text-sm text-gray-600 dark:text-gray-300 mb-3">{project.description}</p>
+          <p class="text-base text-gray-600 dark:text-gray-300">{project.description}</p>
         {/if}
-        
-        <!-- Progress bar -->
-        <div class="flex items-center gap-3 mb-3">
-          <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div 
-              class="bg-indigo-600 dark:bg-indigo-500 h-2 rounded-full transition-all duration-300"
-              style="width: {completionPercentage}%"
-            ></div>
-          </div>
-          <span class="text-sm font-medium text-gray-900 dark:text-white">
-            {completedCount}/{totalTasks}
-          </span>
-        </div>
       </div>
-      
-      <div class="flex items-center gap-2 ml-4">
+
+      <div class="flex items-center gap-2 ml-6 flex-shrink-0">
         <button
           on:click={toggleExpanded}
           class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -129,6 +117,22 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
+      </div>
+    </div>
+
+    <!-- Progress bar - full width -->
+    <div class="mb-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progress</span>
+        <span class="text-sm font-semibold text-gray-900 dark:text-white">
+          {completedCount}/{totalTasks} ({Math.round(completionPercentage)}%)
+        </span>
+      </div>
+      <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+        <div
+          class="bg-indigo-600 dark:bg-indigo-500 h-3 rounded-full transition-all duration-300"
+          style="width: {completionPercentage}%"
+        ></div>
       </div>
     </div>
 
