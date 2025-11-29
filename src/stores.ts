@@ -213,6 +213,187 @@ function createTodoStore() {
         }
         return newData;
       });
+    },
+
+    // Export data as JSON file
+    exportData: () => {
+      let currentData: TodoData = defaultData;
+      const unsubscribe = subscribe(data => {
+        currentData = data;
+      });
+      unsubscribe();
+
+      const jsonString = JSON.stringify(currentData, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      link.download = `game-todo-backup-${timestamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    },
+
+    // Export single project as JSON file
+    exportProject: (projectId: string) => {
+      let currentData: TodoData = defaultData;
+      const unsubscribe = subscribe(data => {
+        currentData = data;
+      });
+      unsubscribe();
+
+      const project = currentData.projects.find(p => p.id === projectId);
+      if (!project) {
+        console.error('Project not found');
+        return;
+      }
+
+      const jsonString = JSON.stringify(project, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+      const fileName = project.name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      link.download = `todo-${fileName}-${timestamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    },
+
+    // Smart import that handles both full data and single project
+    smartImport: (jsonString: string): { success: boolean; error?: string; type?: 'full' | 'project' } => {
+      try {
+        const data = JSON.parse(jsonString);
+
+        if (!data || typeof data !== 'object') {
+          return { success: false, error: 'Invalid JSON format' };
+        }
+
+        // Check if it's a full data export (has projects array and settings)
+        if (Array.isArray(data.projects) && data.settings) {
+          // It's a full data export
+          const result = { success: false, error: '' };
+
+          // Validate the structure
+          if (!data.settings || typeof data.settings !== 'object') {
+            return { success: false, error: 'Missing or invalid settings' };
+          }
+
+          // Ensure uiState exists
+          if (!data.uiState) {
+            data.uiState = {
+              expandedProjects: {},
+              expandedSections: {}
+            };
+          }
+
+          // Validate and fix each project
+          for (const project of data.projects) {
+            if (!project.id || !project.name || !Array.isArray(project.items)) {
+              return { success: false, error: 'Invalid project structure' };
+            }
+
+            // Validate and fix each item
+            for (let i = 0; i < project.items.length; i++) {
+              const item = project.items[i];
+              if (!item.id) {
+                return { success: false, error: `Item ${i} missing 'id' field` };
+              }
+              if (!item.name) {
+                return { success: false, error: `Item ${i} (${item.id}) missing 'name' field` };
+              }
+
+              // Provide defaults for missing fields
+              if (item.status === undefined || item.status === null) {
+                item.status = 'pending';
+              }
+              if (!item.resetTime) {
+                item.resetTime = { type: 'daily', time: '00:00' };
+              }
+              if (typeof item.lastReset !== 'number') {
+                item.lastReset = Date.now();
+              }
+              if (typeof item.isSection !== 'boolean') {
+                item.isSection = false;
+              }
+            }
+          }
+
+          // If all validations pass, save the data
+          set(data);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          }
+
+          return { success: true, type: 'full' };
+        }
+        // Check if it's a single project export (has id, name, items)
+        else if (data.id && data.name && Array.isArray(data.items)) {
+          // It's a single project export
+          const project = data;
+
+          // Validate and fix each item
+          for (let i = 0; i < project.items.length; i++) {
+            const item = project.items[i];
+            if (!item.id) {
+              return { success: false, error: `Item ${i} missing 'id' field` };
+            }
+            if (!item.name) {
+              return { success: false, error: `Item ${i} (${item.id}) missing 'name' field` };
+            }
+
+            // Provide defaults for missing fields
+            if (item.status === undefined || item.status === null) {
+              item.status = 'pending';
+            }
+            if (!item.resetTime) {
+              item.resetTime = { type: 'daily', time: '00:00' };
+            }
+            if (typeof item.lastReset !== 'number') {
+              item.lastReset = Date.now();
+            }
+            if (typeof item.isSection !== 'boolean') {
+              item.isSection = false;
+            }
+          }
+
+          // Check if project with same ID exists
+          update(currentData => {
+            const existingIndex = currentData.projects.findIndex(p => p.id === project.id);
+
+            let newProjects;
+            if (existingIndex !== -1) {
+              // Replace existing project
+              newProjects = [...currentData.projects];
+              newProjects[existingIndex] = project;
+            } else {
+              // Add new project
+              newProjects = [...currentData.projects, project];
+            }
+
+            const newData = {
+              ...currentData,
+              projects: newProjects
+            };
+
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
+            }
+
+            return newData;
+          });
+
+          return { success: true, type: 'project' };
+        } else {
+          return { success: false, error: 'Unrecognized file format. File must be either a full backup or a single project export.' };
+        }
+      } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : 'Failed to parse JSON' };
+      }
     }
   };
 }

@@ -9,7 +9,9 @@
   export let project: TodoProject;
 
   let expanded = false;
-  
+  let errorMessage = '';
+  let successMessage = '';
+
   $: {
     if ($todoStore.uiState && $todoStore.uiState.expandedProjects) {
       expanded = $todoStore.uiState.expandedProjects[project.id] === true;
@@ -34,6 +36,31 @@
 
   function editProject() {
     dispatch('edit', project);
+  }
+
+  function handleExportProject() {
+    try {
+      todoStore.exportProject(project.id);
+      showSuccess('Project exported successfully!');
+    } catch (e) {
+      showError('Failed to export project');
+    }
+  }
+
+  function showSuccess(message: string) {
+    successMessage = message;
+    errorMessage = '';
+    setTimeout(() => {
+      successMessage = '';
+    }, 3000);
+  }
+
+  function showError(message: string) {
+    errorMessage = message;
+    successMessage = '';
+    setTimeout(() => {
+      errorMessage = '';
+    }, 5000);
   }
 </script>
 
@@ -74,6 +101,16 @@
         </button>
 
         <button
+          on:click={handleExportProject}
+          class="p-2 rounded-lg text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+          title="Export project"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </button>
+
+        <button
           on:click={editProject}
           class="p-2 rounded-lg text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
           title="Edit TODO"
@@ -95,11 +132,24 @@
       </div>
     </div>
 
+    <!-- Notifications -->
+    {#if successMessage}
+      <div class="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-200 rounded-lg text-sm">
+        {successMessage}
+      </div>
+    {/if}
+
+    {#if errorMessage}
+      <div class="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-200 rounded-lg text-sm">
+        {errorMessage}
+      </div>
+    {/if}
+
     {#if expanded}
       <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
         {#each rootItems as item (item.id)}
-          <TodoItemComponent 
-            {item} 
+          <TodoItemComponent
+            {item}
             projectId={project.id}
             allItems={project.items}
             depth={0}
