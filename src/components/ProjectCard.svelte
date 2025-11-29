@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
   import { todoStore } from '../stores';
   import type { TodoProject } from '../types';
   import TodoItemComponent from './TodoItemComponent.svelte';
+  import confetti from 'canvas-confetti';
 
   const dispatch = createEventDispatcher();
 
@@ -11,6 +12,12 @@
   let expanded = false;
   let errorMessage = '';
   let successMessage = '';
+  let previousCompletionPercentage = 0;
+  let mounted = false;
+
+  onMount(() => {
+    mounted = true;
+  });
 
   $: {
     if ($todoStore.uiState && $todoStore.uiState.expandedProjects) {
@@ -23,6 +30,63 @@
   $: totalTasks = project.items.filter(item => !item.isSection).length;
   $: completionPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
   $: rootItems = project.items.filter(item => !item.parentId);
+
+  // Trigger confetti when project becomes 100% complete
+  $: if (mounted && totalTasks > 0 && completionPercentage === 100 && previousCompletionPercentage < 100) {
+    celebrateCompletion();
+  }
+
+  // Track previous completion for transition detection
+  $: if (mounted) {
+    if (completionPercentage !== previousCompletionPercentage) {
+      setTimeout(() => {
+        previousCompletionPercentage = completionPercentage;
+      }, 100);
+    }
+  }
+
+  function celebrateCompletion() {
+    // Fire confetti!
+    const count = 200;
+    const defaults = {
+      origin: { y: 0.7 }
+    };
+
+    function fire(particleRatio: number, opts: any) {
+      confetti({
+        ...defaults,
+        ...opts,
+        particleCount: Math.floor(count * particleRatio)
+      });
+    }
+
+    fire(0.25, {
+      spread: 26,
+      startVelocity: 55,
+    });
+
+    fire(0.2, {
+      spread: 60,
+    });
+
+    fire(0.35, {
+      spread: 100,
+      decay: 0.91,
+      scalar: 0.8
+    });
+
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 25,
+      decay: 0.92,
+      scalar: 1.2
+    });
+
+    fire(0.1, {
+      spread: 120,
+      startVelocity: 45,
+    });
+  }
 
   function toggleExpanded() {
     todoStore.toggleProjectExpanded(project.id);
