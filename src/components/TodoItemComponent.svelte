@@ -143,7 +143,6 @@
         <svg class="w-4 h-4 text-gray-400 dark:text-gray-500 transform transition-transform {sectionExpanded ? 'rotate-90' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
-        <div class="w-2 h-8 bg-indigo-500 rounded-full flex-shrink-0"></div>
         <div class="flex-1">
           <h4 class="font-semibold text-gray-900 dark:text-white text-base">{item.name}</h4>
           {#if item.description}
