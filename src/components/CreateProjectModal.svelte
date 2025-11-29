@@ -46,7 +46,7 @@
       const presetNames = ['mmo-dailies', 'gacha-game'];
       const loadedPresets = await Promise.all(
         presetNames.map(async (name) => {
-          const response = await fetch(`/todo/presets/${name}.json`);
+          const response = await fetch(`/presets/${name}.json`);
           if (response.ok) {
             return await response.json();
           }
@@ -81,7 +81,7 @@
         ...item,
         id: idMap.get(item.id)!,
         status: 'pending' as const,
-        lastReset: 0,
+        lastReset: item.resetTime ? 0 : undefined,
         parentId: item.parentId ? idMap.get(item.parentId) || null : null
       })),
       createdAt: Date.now(),
@@ -134,8 +134,8 @@
       name: '',
       description: '',
       status: 'pending',
-      resetTime: { type: 'daily', time: '20:00' },
-      lastReset: 0,
+      resetTime: undefined,
+      lastReset: undefined,
       parentId: undefined,
       isSection: false
     };
@@ -641,31 +641,52 @@
 
         {#if !editingItem.isSection}
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reset Schedule</label>
-            <select
-              bind:value={editingItem.resetTime.type}
-              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-            </select>
-          </div>
-          
-          <div class="flex gap-2">
-            <div class="flex-1">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+            <label class="flex items-center">
               <input
-                bind:value={editingItem.resetTime.time}
-                type="time"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                type="checkbox"
+                checked={!!editingItem.resetTime}
+                on:change={(e) => {
+                  if (e.currentTarget.checked) {
+                    editingItem.resetTime = { type: 'daily', time: '20:00' };
+                    editingItem.lastReset = 0;
+                  } else {
+                    editingItem.resetTime = undefined;
+                    editingItem.lastReset = undefined;
+                  }
+                }}
+                class="mr-2"
               />
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Enable automatic reset</span>
+            </label>
+          </div>
+
+          {#if editingItem.resetTime}
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reset Schedule</label>
+              <select
+                bind:value={editingItem.resetTime.type}
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
             </div>
-            
-            {#if editingItem.resetTime.type === 'weekly'}
+
+            <div class="flex gap-2">
               <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Day</label>
-                <select
-                  bind:value={editingItem.resetTime.weekday}
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time</label>
+                <input
+                  bind:value={editingItem.resetTime.time}
+                  type="time"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              {#if editingItem.resetTime.type === 'weekly'}
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Day</label>
+                  <select
+                    bind:value={editingItem.resetTime.weekday}
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                 >
                   <option value={0}>Sunday</option>
@@ -676,9 +697,10 @@
                   <option value={5}>Friday</option>
                   <option value={6}>Saturday</option>
                 </select>
-              </div>
-            {/if}
-          </div>
+                </div>
+              {/if}
+            </div>
+          {/if}
         {/if}
       </div>
 

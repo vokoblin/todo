@@ -6,11 +6,15 @@
 
   onMount(() => {
     todoStore.init();
-    // Check for resets every minute
+
+    // Check for resets immediately on app load
+    todoStore.checkResets();
+
+    // Then check every 10 seconds
     const interval = setInterval(() => {
       todoStore.checkResets();
-    }, 60000);
-    
+    }, 10000);
+
     return () => clearInterval(interval);
   });
 </script>

@@ -152,25 +152,38 @@ function createTodoStore() {
       update(data => {
         const now = Date.now();
         let hasChanges = false;
-        
+
         const newData = {
           ...data,
           projects: data.projects.map(project => ({
             ...project,
             items: project.items.map(item => {
+              // Skip items without reset time
+              if (!item.resetTime) {
+                return item;
+              }
+
+              // Initialize lastReset if missing (for legacy data or edge cases)
+              if (item.lastReset === undefined || item.lastReset === null) {
+                hasChanges = true;
+                return { ...item, lastReset: 0 };
+              }
+
+              // Check if item needs to be reset
               if (shouldReset(item.resetTime, item.lastReset, now)) {
                 hasChanges = true;
                 return { ...item, status: 'pending', lastReset: now };
               }
+
               return item;
             })
           }))
         };
-        
+
         if (hasChanges && typeof window !== 'undefined') {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(newData));
         }
-        
+
         return newData;
       });
     },
@@ -311,14 +324,16 @@ function createTodoStore() {
               if (item.status === undefined || item.status === null) {
                 item.status = 'pending';
               }
-              if (!item.resetTime) {
-                item.resetTime = { type: 'daily', time: '00:00' };
-              }
-              if (typeof item.lastReset !== 'number') {
-                item.lastReset = Date.now();
-              }
               if (typeof item.isSection !== 'boolean') {
                 item.isSection = false;
+              }
+              // Ensure resetTime and lastReset are consistent
+              if (item.resetTime && typeof item.lastReset !== 'number') {
+                item.lastReset = 0; // Set to 0 so it will reset on first check
+              }
+              // Remove lastReset if no resetTime
+              if (!item.resetTime && item.lastReset !== undefined) {
+                item.lastReset = undefined;
               }
             }
           }
@@ -350,14 +365,16 @@ function createTodoStore() {
             if (item.status === undefined || item.status === null) {
               item.status = 'pending';
             }
-            if (!item.resetTime) {
-              item.resetTime = { type: 'daily', time: '00:00' };
-            }
-            if (typeof item.lastReset !== 'number') {
-              item.lastReset = Date.now();
-            }
             if (typeof item.isSection !== 'boolean') {
               item.isSection = false;
+            }
+            // Ensure resetTime and lastReset are consistent
+            if (item.resetTime && typeof item.lastReset !== 'number') {
+              item.lastReset = 0; // Set to 0 so it will reset on first check
+            }
+            // Remove lastReset if no resetTime
+            if (!item.resetTime && item.lastReset !== undefined) {
+              item.lastReset = undefined;
             }
           }
 
@@ -398,41 +415,55 @@ function createTodoStore() {
   };
 }
 
-function shouldReset(resetTime: ResetTime, lastReset: number, now: number): boolean {
-  const lastResetDate = new Date(lastReset);
+/**
+ * Calculates the most recent scheduled reset time that has already occurred
+ */
+function getMostRecentResetTime(resetTime: ResetTime, now: number): number {
   const nowDate = new Date(now);
-  
+  const [hours, minutes] = resetTime.time.split(':').map(Number);
+
   if (resetTime.type === 'daily') {
-    // Check if it's past reset time today and we haven't reset today
-    const [hours, minutes] = resetTime.time.split(':').map(Number);
+    // Create reset time for today
     const resetToday = new Date(nowDate);
     resetToday.setHours(hours, minutes, 0, 0);
-    
-    // If reset time hasn't passed today, check yesterday
+
+    // If reset time hasn't passed today yet, use yesterday's reset time
     if (nowDate < resetToday) {
       resetToday.setDate(resetToday.getDate() - 1);
     }
-    
-    return lastReset < resetToday.getTime();
+
+    return resetToday.getTime();
   } else if (resetTime.type === 'weekly') {
-    const [hours, minutes] = resetTime.time.split(':').map(Number);
-    const resetDay = resetTime.weekday || 0;
-    
-    // Find the most recent reset day
-    const resetThisWeek = new Date(nowDate);
-    const dayDiff = resetThisWeek.getDay() - resetDay;
-    resetThisWeek.setDate(resetThisWeek.getDate() - (dayDiff >= 0 ? dayDiff : dayDiff + 7));
-    resetThisWeek.setHours(hours, minutes, 0, 0);
-    
-    // If reset time hasn't passed this week, check last week
-    if (nowDate < resetThisWeek) {
-      resetThisWeek.setDate(resetThisWeek.getDate() - 7);
+    const targetDay = resetTime.weekday || 0;
+    const currentDay = nowDate.getDay();
+
+    // Calculate days since the most recent target weekday
+    let daysSince = (currentDay - targetDay + 7) % 7;
+
+    // Create reset time for the most recent target weekday
+    const mostRecentReset = new Date(nowDate);
+    mostRecentReset.setDate(mostRecentReset.getDate() - daysSince);
+    mostRecentReset.setHours(hours, minutes, 0, 0);
+
+    // If we're on the target day but haven't reached reset time yet,
+    // use last week's reset time instead
+    if (daysSince === 0 && nowDate < mostRecentReset) {
+      mostRecentReset.setDate(mostRecentReset.getDate() - 7);
     }
-    
-    return lastReset < resetThisWeek.getTime();
+
+    return mostRecentReset.getTime();
   }
-  
-  return false;
+
+  return now;
+}
+
+/**
+ * Determines if a todo item should be reset based on its reset schedule.
+ * Returns true if lastReset is before the most recent scheduled reset time.
+ */
+function shouldReset(resetTime: ResetTime, lastReset: number, now: number): boolean {
+  const mostRecentResetTime = getMostRecentResetTime(resetTime, now);
+  return lastReset < mostRecentResetTime;
 }
 
 export const todoStore = createTodoStore();

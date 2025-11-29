@@ -9,10 +9,10 @@
   export let depth: number = 0;
 
   let timeRemaining = '';
-  let timeInterval: NodeJS.Timeout;
+  let timeInterval: NodeJS.Timeout | null = null;
 
   let sectionExpanded = true;
-  
+
   $: {
     if (item.isSection) {
       if ($todoStore.uiState && $todoStore.uiState.expandedSections) {
@@ -25,6 +25,13 @@
     }
   }
   $: childItems = allItems.filter(child => child.parentId === item.id);
+
+  // Update time remaining whenever reset time changes
+  $: if (!item.isSection && item.resetTime) {
+    timeRemaining = getTimeUntilReset(item.resetTime);
+  } else {
+    timeRemaining = '';
+  }
 
   // Check if all non-section child items are completed
   $: allTasksCompleted = (() => {
@@ -86,17 +93,18 @@
   ].filter(Boolean).join(' ');
 
   onMount(() => {
-    if (!item.isSection) {
-      timeRemaining = getTimeUntilReset(item.resetTime);
-      timeInterval = setInterval(() => {
+    // Set up interval to update time remaining every minute
+    timeInterval = setInterval(() => {
+      if (!item.isSection && item.resetTime) {
         timeRemaining = getTimeUntilReset(item.resetTime);
-      }, 60000);
-    }
+      }
+    }, 60000);
   });
 
   onDestroy(() => {
     if (timeInterval) {
       clearInterval(timeInterval);
+      timeInterval = null;
     }
   });
 
@@ -222,22 +230,28 @@
           <h4 class={titleClasses}>
             {item.name}
           </h4>
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
-            {formatResetTime(item.resetTime)}
-          </span>
-        </div>
-        <div class="flex items-center justify-between gap-3 mt-1">
-          {#if item.description}
-            <p class={descriptionClasses}>
-              {item.description}
-            </p>
-          {:else}
-            <div></div>
+          {#if item.resetTime}
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex-shrink-0">
+              {formatResetTime(item.resetTime)}
+            </span>
           {/if}
-          <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 flex-shrink-0">
-            {timeRemaining}
-          </span>
         </div>
+        {#if item.description || item.resetTime}
+          <div class="flex items-center justify-between gap-3 mt-1">
+            {#if item.description}
+              <p class={descriptionClasses}>
+                {item.description}
+              </p>
+            {:else}
+              <div></div>
+            {/if}
+            {#if item.resetTime}
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 flex-shrink-0">
+                {timeRemaining}
+              </span>
+            {/if}
+          </div>
+        {/if}
       </div>
     {/if}
   </div>

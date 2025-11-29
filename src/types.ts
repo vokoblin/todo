@@ -11,8 +11,8 @@ export type TodoItem = {
   name: string;
   description?: string;
   status: TodoStatus;
-  resetTime: ResetTime;
-  lastReset: number; // timestamp
+  resetTime?: ResetTime;
+  lastReset?: number; // timestamp
   parentId?: string; // for nested items
   isSection: boolean;
 };
