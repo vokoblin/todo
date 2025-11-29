@@ -227,20 +227,38 @@
             ? { ...item, parentId: targetItem.id }
             : item
         );
-      } else if (!targetItem.isSection && targetItem.parentId) {
-        // Drop item next to another item that's in a section
-        customItems = customItems.map(item =>
+      } else {
+        // Dropping on a non-section item
+        const draggedParentId = draggedItem.parentId;
+        const targetParentId = targetItem.parentId;
+
+        // Update parent if needed
+        const updatedItems = customItems.map(item =>
           item.id === draggedItem!.id
-            ? { ...item, parentId: targetItem.parentId }
+            ? { ...item, parentId: targetParentId }
             : item
         );
-      } else if (!targetItem.parentId && !targetItem.isSection) {
-        // Drop item to root level next to another root item
-        customItems = customItems.map(item =>
-          item.id === draggedItem!.id
-            ? { ...item, parentId: undefined }
-            : item
-        );
+
+        // Reorder items within the same parent
+        const draggedIndex = updatedItems.findIndex(item => item.id === draggedItem!.id);
+        const targetIndex = updatedItems.findIndex(item => item.id === targetItem.id);
+
+        // Remove dragged item from its current position
+        const [removed] = updatedItems.splice(draggedIndex, 1);
+
+        // Find new target index (it may have shifted after removal)
+        const newTargetIndex = updatedItems.findIndex(item => item.id === targetItem.id);
+
+        // Insert before or after target based on drag direction
+        if (draggedIndex < targetIndex) {
+          // Dragging down - insert after target
+          updatedItems.splice(newTargetIndex + 1, 0, removed);
+        } else {
+          // Dragging up - insert before target
+          updatedItems.splice(newTargetIndex, 0, removed);
+        }
+
+        customItems = updatedItems;
       }
     }
     draggedItem = null;
