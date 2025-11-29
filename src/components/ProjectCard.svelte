@@ -130,7 +130,7 @@
       </div>
       <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
         <div
-          class="bg-indigo-600 dark:bg-indigo-500 h-3 rounded-full transition-all duration-300"
+          class="{completionPercentage === 100 ? 'bg-green-600 dark:bg-green-500' : 'bg-indigo-600 dark:bg-indigo-500'} h-3 rounded-full transition-all duration-300"
           style="width: {completionPercentage}%"
         ></div>
       </div>
